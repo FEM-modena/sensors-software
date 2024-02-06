@@ -26,21 +26,20 @@
 
 #include <WString.h>
 
-#if defined(ESP8266)
-#include <Hash.h>
-#include <coredecls.h>
-#include <ESP8266WiFi.h>
-#include <SoftwareSerial.h>
-#endif
-
-#if defined(ESP32)
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
-#include <hwcrypto/sha.h>
+  #if ESP_IDF_VERSION_MAJOR >= 4
+    #if ( ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(1, 0, 6) )
+      #include "sha/sha_parallel_engine.h"
+    #else
+      #include <esp32/sha.h>
+    #endif  
+  #else
+    //#include <hwcrypto/sha.h>
+  #endif
 #include <freertos/queue.h>
-#endif
 
 constexpr unsigned SMALL_STR = 64-1;
 constexpr unsigned MED_STR = 256-1;
@@ -71,10 +70,13 @@ extern String check_display_value(double value, double undef, uint8_t len, uint8
 extern void add_Value2Json(String& res, const __FlashStringHelper* type, const String& value);
 extern void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value);
 
-#if defined(ESP8266)
+// #if defined(ESP8266)
+// extern void configureCACertTrustAnchor(WiFiClientSecure* client);
+// extern bool launchUpdateLoader(const String& md5);
+// #endif
+
 extern void configureCACertTrustAnchor(WiFiClientSecure* client);
 extern bool launchUpdateLoader(const String& md5);
-#endif
 
 extern float readCorrectionOffset(const char* correction);
 
@@ -82,12 +84,10 @@ namespace cfg {
 	extern unsigned debug;
 }
 
-#if defined(ESP8266)
-extern SoftwareSerial serialSDS;
-#endif
-#if defined(ESP32)
 #define serialSDS (Serial1)
-#endif
+#define serialGPS (&(Serial2))
+#define serialNPM (Serial1)
+#define serialIPS (Serial1)
 
 enum class PmSensorCmd {
 	Start,
@@ -98,7 +98,28 @@ enum class PmSensorCmd {
 enum class PmSensorCmd2 { // for NPM
 	State,
 	Change,
-	Concentration
+	Concentration,
+	Version,
+	Speed,
+	Temphumi
+};
+
+enum class PmSensorCmd3 { // for IPS7100
+	Factory,
+	Manual,
+	Auto,
+	Reset,
+	Interval,
+	Get,
+	//Version,
+	//Clean,
+	//Autoclean,
+	Start,
+	Stop,
+	Smoke,
+	//CRC,
+	Lowdata,
+	Baud
 };
 
 /*****************************************************************
@@ -114,12 +135,8 @@ public:
 	String popLines();
 
 private:
-#if defined(ESP8266)
-	std::unique_ptr<circular_queue<uint8_t> > m_buffer;
-#endif
-#if defined(ESP32)
 	QueueHandle_t m_buffer;
-#endif
+
 };
 
 extern class LoggingSerial Debug;
@@ -144,8 +161,14 @@ extern bool SDS_cmd(PmSensorCmd cmd);
 extern bool PMS_cmd(PmSensorCmd cmd);
 extern bool HPM_cmd(PmSensorCmd cmd);
 extern void NPM_cmd(PmSensorCmd2 cmd);
+extern void IPS_cmd(PmSensorCmd3 cmd);
 extern bool NPM_checksum_valid_4(const uint8_t (&data)[4]);
+extern bool NPM_checksum_valid_5(const uint8_t (&data)[5]);
+extern bool NPM_checksum_valid_6(const uint8_t (&data)[6]);
+extern bool NPM_checksum_valid_8(const uint8_t (&data)[8]);
 extern bool NPM_checksum_valid_16(const uint8_t (&data)[16]);
+extern void NPM_data_reader(uint8_t data[], size_t size);
+extern String NPM_state(uint8_t bytedata);
 
 extern bool isNumeric(const String& str);
 

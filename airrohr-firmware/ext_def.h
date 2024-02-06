@@ -12,12 +12,12 @@ const char WWW_PASSWORD[] PROGMEM = "";
 
 // Sensor Wifi config (config mode)
 #define FS_SSID ""
-#define FS_PWD ""
+#define FS_PWD "airrohrcfg"
 
 // Where to send the data?
 #define SEND2SENSORCOMMUNITY 1
 #define SSL_SENSORCOMMUNITY 0
-#define SEND2MADAVI 1
+#define SEND2MADAVI 0
 #define SSL_MADAVI 0
 #define SEND2SENSEMAP 0
 #define SEND2FSAPP 0
@@ -26,7 +26,7 @@ const char WWW_PASSWORD[] PROGMEM = "";
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
 #define SEND2LORA 0
-#define SEND2CSV 0
+#define SEND2CSV 1  //FEM: opzione temporanea per development
 #define SEND2CUSTOM 0
 
 // OpenSenseMap
@@ -56,6 +56,7 @@ struct LoggerConfig {
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 static const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
 static const char URL_MADAVI[] PROGMEM = "/data.php";
+#define PORT_DUSTI 80
 #define PORT_MADAVI 80
 
 static const char HOST_SENSORCOMMUNITY[] PROGMEM = "api.sensor.community";
@@ -101,47 +102,7 @@ static const char URL_INFLUX[] PROGMEM = "/write?db=sensorcommunity";
 static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define SSL_INFLUX 0
 
-//  === pin assignments for NodeMCU V2 board ===================================
-#if defined(ESP8266)
-// define pin for one wire sensors
-#define ONEWIRE_PIN D7
-
-// define serial interface pins for particle sensors
-// Serial confusion: These definitions are based on SoftSerial
-// TX (transmitting) pin on one side goes to RX (receiving) pin on other side
-// SoftSerial RX PIN is D1 and goes to SDS TX
-// SoftSerial TX PIN is D2 and goes to SDS RX
-#define PM_SERIAL_RX D1
-#define PM_SERIAL_TX D2
-
-// define pins for I2C
-#define I2C_PIN_SCL D4
-#define I2C_PIN_SDA D3
-
-// define serial interface pins for GPS modules
-#define GPS_SERIAL_RX D5
-#define GPS_SERIAL_TX D6
-
-// PPD42NS, the cheaper version of the particle sensor
-#define PPD_PIN_PM1 GPS_SERIAL_TX
-#define PPD_PIN_PM2 GPS_SERIAL_RX
-#endif
-
-
-//  === pin assignments for Arduino SAMD Zero board ===================================
-#if defined(ARDUINO_SAMD_ZERO)
-#define ONEWIRE_PIN D7
-#define PPD_PIN_PM1 GPS_SERIAL_TX
-#define PPD_PIN_PM2 GPS_SERIAL_RX
-#if defined(SERIAL_PORT_USBVIRTUAL)
-#define RFM69_CS 8
-#define RFM69_RST 4
-#define RFM69_INT 3
-#endif
-#endif
-
 //  === pin assignments for dev kit board ===================================
-#ifdef ESP32
 #define ONEWIRE_PIN D32
 #define PM_SERIAL_RX D27
 #define PM_SERIAL_TX D33
@@ -163,60 +124,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 //#define RFM69_CS D0
 //#define RFM69_RST D2
 //#define RFM69_INT D4
-#endif
-
-//  === pin assignments for lolin_d32_pro board ===================================
-#if defined(ARDUINO_LOLIN_D32_PRO)
-#define ONEWIRE_PIN D32
-#define PM_SERIAL_RX D27
-#define PM_SERIAL_TX D33
-#if defined(FLIP_I2C_PMSERIAL) // exchange the pins of the ports to use external i2c connector for gps
-#define I2C_PIN_SCL D23
-#define I2C_PIN_SDA D19
-#define GPS_SERIAL_RX D22
-#define GPS_SERIAL_TX D21
-#else
-#define I2C_PIN_SCL D22
-#define I2C_PIN_SDA D21
-#define GPS_SERIAL_RX D19
-#define GPS_SERIAL_TX D23
-#endif
-#define PPD_PIN_PM1 GPS_SERIAL_TX
-#define PPD_PIN_PM2 GPS_SERIAL_RX
-//#define RFM69_CS D0
-//#define RFM69_RST D2
-//#define RFM69_INT D4
-#endif
-
-//  === pin assignments for heltec_wifi_lora_32_V2 board ===================================
-#if defined(WIFI_LoRa_32_V2)
-#define ONEWIRE_PIN D32
-#define I2C_PIN_SCL D22
-#define I2C_PIN_SDA D17_WROOM_ONLY
-#define PM_SERIAL_RX D23
-#define PM_SERIAL_TX D2_STRAPPING
-#define GPS_SERIAL_RX D13_JTAG_TCK
-#define GPS_SERIAL_TX D0_STRAPPING
-#define PPD_PIN_PM1 GPS_SERIAL_TX
-#define PPD_PIN_PM2 GPS_SERIAL_RX
-#endif
-
-//  === pin assignments for heltec_wifi_lora_32 board ===================================
-#if defined(WIFI_LoRa_32)
-#define ONEWIRE_PIN D25 // TODO: this overlaps with LED, so it might not work
-#define I2C_PIN_SCL D22
-#define I2C_PIN_SDA D17_WROOM_ONLY
-#define PM_SERIAL_RX D23
-#define PM_SERIAL_TX D2_STRAPPING
-#define GPS_SERIAL_RX D13_JTAG_TCK
-#define GPS_SERIAL_TX D0_STRAPPING
-#define PPD_PIN_PM1 GPS_SERIAL_TX
-#define PPD_PIN_PM2 GPS_SERIAL_RX
-#endif
-
 
 // DHT22, temperature, humidity
-#define DHT_READ 1
+#define DHT_READ 0
 #define DHT_TYPE DHT22
 #define DHT_API_PIN 7
 
@@ -225,11 +135,11 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define HTU21D_API_PIN 7
 
 // PPD42NS, the cheaper version of the particle sensor
-#define PPD_READ 0
+#define PPD_READ 1  //FEM: SETTATO AD 1 PER SEEED GROVE DUST SENSOR
 #define PPD_API_PIN 5
 
 // SDS011, the more expensive version of the particle sensor
-#define SDS_READ 1
+#define SDS_READ 0
 #define SDS_API_PIN 1
 
 // PMS1003, PMS300, 3PMS5003, PMS6003, PMS7003
@@ -243,6 +153,11 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // Tera Sensor Next PM sensor
 #define NPM_READ 0
 #define NPM_API_PIN 1
+#define NPM_FULLTIME 0
+
+// Piera Systems IPS-7100
+#define IPS_READ 0
+#define IPS_API_PIN 1
 
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
@@ -255,13 +170,21 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define BMP_API_PIN 3
 
 // BMP280/BME280, temperature, pressure (humidity on BME280)
-#define BMX280_READ 0
+#define BMX280_READ 0  
 #define BMP280_API_PIN 3
 #define BME280_API_PIN 11
+
+// by FEM: BME68x temperature, pressure, humidity - no VOC in this version
+#define BME68x_READ 1  
+#define BME68x_API_PIN 11  //Stessa API pin del BME280
 
 // SHT3x, temperature, pressure
 #define SHT3X_READ 0
 #define SHT3X_API_PIN 7
+
+// SHT3x, temperature, pressure, CO2
+#define SCD30_READ 0
+#define SCD30_API_PIN 17
 
 // DS18B20, temperature
 #define DS18B20_READ 0
@@ -283,7 +206,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define MHZ19_READ 0
 
 // automatic firmware updates
-#define AUTO_UPDATE 1
+#define AUTO_UPDATE 0
 
 // use beta firmware
 #define USE_BETA 0

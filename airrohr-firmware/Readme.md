@@ -1,5 +1,11 @@
 # airRohr Sensor Firmware for SPS30, SDS011, DHT22, BMP180, BMP/E 280 and many more
 
+**ESP32 version with https implementation**
+
+The OTA is fully deactivated though.
+It will serve as a basis for a new firmware version with 2 fully usable UARTs.
+
+
 ## Features:
 * many environmental and air quality sensors can be used concurrently
 * Integration in Sensor.Community (formerly Luftdaten.Info)
@@ -120,7 +126,7 @@ Pinout:
 * Pin 7	(RX)     -> Pin D2 (GPIO4)
 * Pin 8 (GND)    -> GND
 
-### BMP180 / BME/P280 / HTU21D / SHT3x (I2C)
+### BMP180 / BME/P280/68x / HTU21D / SHT3x  (I2C)
 * VCC  ->  Pin 3V3
 * GND  ->  Pin GND
 * SCL  ->  Pin D4 (GPIO2)
